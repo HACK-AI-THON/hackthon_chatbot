@@ -1,0 +1,3 @@
+# This file keeps the simple_db directory in git
+# Actual database files (.pkl, .json) are ignored by .gitignore
+

@@ -1,0 +1,9 @@
+﻿fastapi
+uvicorn[standard]
+python-multipart
+PyPDF2
+python-docx
+sentence-transformers
+openai
+python-dotenv
+requests
