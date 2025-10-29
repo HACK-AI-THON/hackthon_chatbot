@@ -44,7 +44,7 @@
 
 # COMMAND ----------
 
-%pip install fastapi==0.104.1 uvicorn[standard]==0.24.0 python-multipart==0.0.6 PyPDF2==3.0.1 python-docx==1.1.0 sentence-transformers==2.2.2 requests==2.31.0 scikit-learn==1.3.2
+%pip install --upgrade "huggingface_hub>=0.14.1" "sentence-transformers>=2.3.1,<5.2.0" fastapi==0.104.1 uvicorn[standard]==0.24.0 python-multipart==0.0.6 PyPDF2==3.0.1 python-docx==1.1.0 requests==2.31.0 scikit-learn==1.3.2
 
 # COMMAND ----------
 
@@ -69,16 +69,46 @@ from pathlib import Path
 def get_databricks_context():
     """Get Databricks workspace context"""
     try:
-        ctx = dbutils.notebook.entry_point.getDbutils().notebook().getContext()
+        # Try to get context from Spark
+        from pyspark.sql import SparkSession
+        spark = SparkSession.builder.getOrCreate()
+        
+        # Get tags from Spark conf
+        tags = spark.sparkContext.getConf().getAll()
+        tags_dict = dict(tags)
+        
+        # Extract relevant information
+        context = {}
+        
+        # Get workspace URL
+        if 'spark.databricks.workspaceUrl' in tags_dict:
+            context['workspace_url'] = f"https://{tags_dict['spark.databricks.workspaceUrl']}"
+        else:
+            context['workspace_url'] = "https://dbc-4a93b454-f17b.cloud.databricks.com"
+        
+        # Get org ID
+        context['org_id'] = tags_dict.get('spark.databricks.clusterUsageTags.orgId', 'unknown')
+        
+        # Get cluster ID
+        context['cluster_id'] = tags_dict.get('spark.databricks.clusterUsageTags.clusterId', 'unknown')
+        
+        # Get user
+        context['user'] = tags_dict.get('spark.databricks.clusterUsageTags.clusterOwnerUserId', 'unknown')
+        
+        # Get browser hostname
+        context['browser_host_name'] = tags_dict.get('spark.databricks.workspaceUrl', 'unknown')
+        
+        return context
+    except Exception as e:
+        print(f"⚠️ Could not get Databricks context: {e}")
+        # Return minimal context with defaults
         return {
-            "workspace_url": ctx.apiUrl().get(),
-            "org_id": ctx.tags().get("orgId").get(),
-            "cluster_id": ctx.tags().get("clusterId").get(),
-            "user": ctx.tags().get("user").get(),
-            "browser_host_name": ctx.browserHostName().get()
+            "workspace_url": "https://dbc-4a93b454-f17b.cloud.databricks.com",
+            "org_id": "unknown",
+            "cluster_id": "unknown",
+            "user": "unknown",
+            "browser_host_name": "dbc-4a93b454-f17b.cloud.databricks.com"
         }
-    except:
-        return None
 
 # Get context
 db_context = get_databricks_context()
