@@ -67,41 +67,44 @@ from pathlib import Path
 # ====================
 
 def get_databricks_context():
-    """Get Databricks workspace context"""
+    """Get Databricks workspace context (Spark Connect compatible)"""
     try:
-        # Try to get context from Spark
-        from pyspark.sql import SparkSession
-        spark = SparkSession.builder.getOrCreate()
+        import os
         
-        # Get tags from Spark conf
-        tags = spark.sparkContext.getConf().getAll()
-        tags_dict = dict(tags)
+        # Try to get from dbutils (works in notebooks)
+        try:
+            # Get notebook context
+            notebook_context = dbutils.notebook.entry_point.getDbutils().notebook().getContext()
+            
+            return {
+                "workspace_url": notebook_context.apiUrl().getOrElse("https://dbc-4a93b454-f17b.cloud.databricks.com"),
+                "org_id": notebook_context.tags().get("orgId").getOrElse("unknown"),
+                "cluster_id": notebook_context.tags().get("clusterId").getOrElse("unknown"),
+                "user": notebook_context.tags().get("user").getOrElse("unknown"),
+                "browser_host_name": notebook_context.browserHostName().getOrElse("dbc-4a93b454-f17b.cloud.databricks.com")
+            }
+        except:
+            pass
         
-        # Extract relevant information
-        context = {}
+        # Fallback: Use environment variables (Spark Connect compatible)
+        workspace_url = os.getenv("DATABRICKS_HOST", "https://dbc-4a93b454-f17b.cloud.databricks.com")
         
-        # Get workspace URL
-        if 'spark.databricks.workspaceUrl' in tags_dict:
-            context['workspace_url'] = f"https://{tags_dict['spark.databricks.workspaceUrl']}"
-        else:
-            context['workspace_url'] = "https://dbc-4a93b454-f17b.cloud.databricks.com"
+        # Extract org_id and cluster_id from environment if available
+        org_id = os.getenv("DATABRICKS_ORG_ID", "unknown")
+        cluster_id = os.getenv("DATABRICKS_CLUSTER_ID", "unknown")
+        user = os.getenv("USER", "unknown")
         
-        # Get org ID
-        context['org_id'] = tags_dict.get('spark.databricks.clusterUsageTags.orgId', 'unknown')
+        return {
+            "workspace_url": workspace_url,
+            "org_id": org_id,
+            "cluster_id": cluster_id,
+            "user": user,
+            "browser_host_name": workspace_url.replace("https://", "")
+        }
         
-        # Get cluster ID
-        context['cluster_id'] = tags_dict.get('spark.databricks.clusterUsageTags.clusterId', 'unknown')
-        
-        # Get user
-        context['user'] = tags_dict.get('spark.databricks.clusterUsageTags.clusterOwnerUserId', 'unknown')
-        
-        # Get browser hostname
-        context['browser_host_name'] = tags_dict.get('spark.databricks.workspaceUrl', 'unknown')
-        
-        return context
     except Exception as e:
-        print(f"⚠️ Could not get Databricks context: {e}")
-        # Return minimal context with defaults
+        print(f"ℹ️ Using default workspace configuration")
+        # Return defaults
         return {
             "workspace_url": "https://dbc-4a93b454-f17b.cloud.databricks.com",
             "org_id": "unknown",
