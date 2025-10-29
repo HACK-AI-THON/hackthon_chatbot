@@ -29,7 +29,7 @@ document_processor = DocumentProcessor()
 
 # Determine storage directory for knowledge base
 if os.path.exists("/Volumes"):
-    KB_STORAGE_DIR = "/Volumes/main/default/hackathon_chatbot_data"
+    KB_STORAGE_DIR = "/Volumes/hackathon/default/hackathon_chatbot_data"
 elif os.path.exists("/dbfs"):
     KB_STORAGE_DIR = "/dbfs/FileStore/hackathon-chatbot/simple_db"
 else:
@@ -41,7 +41,7 @@ chat_handler = ChatHandler(knowledge_base)  # Auto-detects Databricks settings
 # Configure upload directory - Use Unity Catalog Volumes if available
 if os.path.exists("/Volumes"):
     # Unity Catalog Volumes (Databricks modern approach)
-    UPLOAD_DIR = Path("/Volumes/main/default/hackathon_chatbot_uploads")
+    UPLOAD_DIR = Path("/Volumes/hackathon/default/hackathon_chatbot_uploads")
 elif os.path.exists("/dbfs"):
     # DBFS (Databricks legacy approach)
     UPLOAD_DIR = Path("/dbfs/FileStore/hackathon-chatbot/uploads")

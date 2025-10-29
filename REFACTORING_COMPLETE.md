@@ -138,8 +138,8 @@ python main.py
 
 **Step 1: Create Volumes**
 ```sql
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_uploads;
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_data;
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_uploads;
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_data;
 ```
 
 **Step 2: Set Up Token**

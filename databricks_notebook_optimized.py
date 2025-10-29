@@ -28,14 +28,14 @@
 
 # MAGIC %sql
 # MAGIC -- Create volumes for data storage
-# MAGIC CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_uploads
+# MAGIC CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_uploads
 # MAGIC COMMENT 'Uploaded documents storage (PDF, DOCX)';
 # MAGIC 
-# MAGIC CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_data
+# MAGIC CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_data
 # MAGIC COMMENT 'Knowledge base vector embeddings storage';
 # MAGIC 
 # MAGIC -- Verify
-# MAGIC SHOW VOLUMES IN main.default;
+# MAGIC SHOW VOLUMES IN hackathon.default;
 
 # COMMAND ----------
 
@@ -99,10 +99,10 @@ def get_storage_paths():
     """Auto-detect and configure storage paths"""
     
     # Unity Catalog Volumes (Priority 1 - Modern)
-    if os.path.exists("/Volumes/main/default/hackathon_chatbot_uploads"):
+    if os.path.exists("/Volumes/hackathon/default/hackathon_chatbot_uploads"):
         return {
-            "uploads": "/Volumes/main/default/hackathon_chatbot_uploads",
-            "data": "/Volumes/main/default/hackathon_chatbot_data",
+            "uploads": "/Volumes/hackathon/default/hackathon_chatbot_uploads",
+            "data": "/Volumes/hackathon/default/hackathon_chatbot_data",
             "type": "Unity Catalog Volumes"
         }
     

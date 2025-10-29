@@ -8,8 +8,8 @@
 
 ### 1️⃣ Create Volumes (2 min)
 ```sql
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_uploads;
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_data;
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_uploads;
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_data;
 ```
 
 ### 2️⃣ Set Up Token (2 min)
@@ -101,11 +101,11 @@ dbutils.secrets.putSecret(
 ### Volumes Don't Exist?
 ```sql
 -- Run this SQL:
-SHOW VOLUMES IN main.default;
+SHOW VOLUMES IN hackathon.default;
 
 -- If empty, create them:
-CREATE VOLUME main.default.hackathon_chatbot_uploads;
-CREATE VOLUME main.default.hackathon_chatbot_data;
+CREATE VOLUME hackathon.default.hackathon_chatbot_uploads;
+CREATE VOLUME hackathon.default.hackathon_chatbot_data;
 ```
 
 ### Server Won't Start?

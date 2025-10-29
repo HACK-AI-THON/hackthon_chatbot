@@ -153,8 +153,8 @@ python main.py
 
 **Step 2: Create Volumes (if not exists)**
 ```sql
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_uploads;
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_data;
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_uploads;
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_data;
 ```
 
 **Step 3: Set Up Secrets (if not exists)**

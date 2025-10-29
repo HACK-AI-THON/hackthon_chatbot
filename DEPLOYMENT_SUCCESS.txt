@@ -77,8 +77,8 @@ Next Steps:
 
 3. 📊 Create Unity Catalog Volumes in Databricks:
    ```sql
-   CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_uploads;
-   CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_data;
+   CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_uploads;
+   CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_data;
    ```
 
 4. 📓 Open your Databricks notebook:

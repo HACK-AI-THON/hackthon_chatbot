@@ -33,7 +33,7 @@ This guide shows you how to create Unity Catalog Volumes for storing your applic
 CREATE CATALOG IF NOT EXISTS main;
 
 -- Create schema (if not exists)
-CREATE SCHEMA IF NOT EXISTS main.default;
+CREATE SCHEMA IF NOT EXISTS hackathon.default;
 
 -- Verify
 SHOW CATALOGS;
@@ -48,15 +48,15 @@ Run this in a Databricks notebook:
 
 ```sql
 -- Create volume for uploads (PDF, DOCX files)
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_uploads
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_uploads
 COMMENT 'Storage for uploaded documents (PDF, DOCX)';
 
 -- Create volume for knowledge base (vector embeddings)
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_data
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_data
 COMMENT 'Storage for vector embeddings and knowledge base';
 
 -- Verify volumes were created
-SHOW VOLUMES IN main.default;
+SHOW VOLUMES IN hackathon.default;
 ```
 
 ---
@@ -98,16 +98,16 @@ except Exception as e:
 
 ```sql
 -- Grant access to specific users/groups
-GRANT READ, WRITE ON VOLUME main.default.hackathon_chatbot_uploads TO `user@domain.com`;
-GRANT READ, WRITE ON VOLUME main.default.hackathon_chatbot_data TO `user@domain.com`;
+GRANT READ, WRITE ON VOLUME hackathon.default.hackathon_chatbot_uploads TO `user@domain.com`;
+GRANT READ, WRITE ON VOLUME hackathon.default.hackathon_chatbot_data TO `user@domain.com`;
 
 -- Grant to all users (less secure, use for testing only)
-GRANT READ, WRITE ON VOLUME main.default.hackathon_chatbot_uploads TO `account users`;
-GRANT READ, WRITE ON VOLUME main.default.hackathon_chatbot_data TO `account users`;
+GRANT READ, WRITE ON VOLUME hackathon.default.hackathon_chatbot_uploads TO `account users`;
+GRANT READ, WRITE ON VOLUME hackathon.default.hackathon_chatbot_data TO `account users`;
 
 -- Show current permissions
-SHOW GRANTS ON VOLUME main.default.hackathon_chatbot_uploads;
-SHOW GRANTS ON VOLUME main.default.hackathon_chatbot_data;
+SHOW GRANTS ON VOLUME hackathon.default.hackathon_chatbot_uploads;
+SHOW GRANTS ON VOLUME hackathon.default.hackathon_chatbot_data;
 ```
 
 ---
@@ -175,19 +175,19 @@ display(dbutils.fs.ls("/Volumes/main/default/hackathon_chatbot_uploads"))
 
 ### Delete Volume (if needed):
 ```sql
-DROP VOLUME IF EXISTS main.default.hackathon_chatbot_uploads;
-DROP VOLUME IF EXISTS main.default.hackathon_chatbot_data;
+DROP VOLUME IF EXISTS hackathon.default.hackathon_chatbot_uploads;
+DROP VOLUME IF EXISTS hackathon.default.hackathon_chatbot_data;
 ```
 
 ### Rename Volume:
 ```sql
-ALTER VOLUME main.default.hackathon_chatbot_uploads 
-RENAME TO main.default.my_new_volume_name;
+ALTER VOLUME hackathon.default.hackathon_chatbot_uploads 
+RENAME TO hackathon.default.my_new_volume_name;
 ```
 
 ### View Volume Details:
 ```sql
-DESCRIBE VOLUME main.default.hackathon_chatbot_uploads;
+DESCRIBE VOLUME hackathon.default.hackathon_chatbot_uploads;
 ```
 
 ---
@@ -205,10 +205,10 @@ SHOW CATALOGS;
 SHOW SCHEMAS IN main;
 
 -- Check if volume exists
-SHOW VOLUMES IN main.default;
+SHOW VOLUMES IN hackathon.default;
 
 -- Create if missing
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_uploads;
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_uploads;
 ```
 
 ### Issue: "Permission denied"
@@ -216,7 +216,7 @@ CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_uploads;
 **Solution:**
 ```sql
 -- Grant yourself permission
-GRANT ALL PRIVILEGES ON VOLUME main.default.hackathon_chatbot_uploads TO `your-email@domain.com`;
+GRANT ALL PRIVILEGES ON VOLUME hackathon.default.hackathon_chatbot_uploads TO `your-email@domain.com`;
 
 -- Or ask workspace admin for access
 ```
@@ -256,16 +256,16 @@ Once volumes are created:
 
 ```sql
 -- 1. Create volumes
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_uploads;
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_data;
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_uploads;
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_data;
 
 -- 2. Verify
-SHOW VOLUMES IN main.default;
+SHOW VOLUMES IN hackathon.default;
 
 -- 3. Test in Python
 import os
-print("Uploads:", os.path.exists("/Volumes/main/default/hackathon_chatbot_uploads"))
-print("Data:", os.path.exists("/Volumes/main/default/hackathon_chatbot_data"))
+print("Uploads:", os.path.exists("/Volumes/hackathon/default/hackathon_chatbot_uploads"))
+print("Data:", os.path.exists("/Volumes/hackathon/default/hackathon_chatbot_data"))
 ```
 
 **That's it!** Your application will automatically use Unity Catalog Volumes. 🎉

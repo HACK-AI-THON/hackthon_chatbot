@@ -546,14 +546,14 @@ databricks configure --token
 ### 2. Create Required Directories
 ```sql
 -- In Databricks SQL or notebook
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_uploads
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_uploads
 COMMENT 'Storage for uploaded documents (PDF, DOCX)';
 
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_data
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_data
 COMMENT 'Storage for vector embeddings and knowledge base';
 
 -- Verify
-SHOW VOLUMES IN main.default;
+SHOW VOLUMES IN hackathon.default;
 ```
 
 **Note:** Unity Catalog Volumes are the modern best practice. The code automatically falls back to DBFS if volumes are not available.

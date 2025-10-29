@@ -14,7 +14,7 @@ class KnowledgeBase:
         # Use Unity Catalog Volume (modern best practice) or fallback
         if os.path.exists("/Volumes"):
             # Unity Catalog Volumes (Databricks modern approach)
-            self.storage_directory = Path("/Volumes/main/default/hackathon_chatbot_data")
+            self.storage_directory = Path("/Volumes/hackathon/default/hackathon_chatbot_data")
         elif os.path.exists("/dbfs"):
             # DBFS (Databricks legacy approach)
             self.storage_directory = Path("/dbfs/FileStore/hackathon-chatbot/simple_db")

@@ -35,21 +35,21 @@
 
 ```sql
 -- In a Databricks SQL notebook or SQL editor
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_uploads
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_uploads
 COMMENT 'Uploaded documents (PDF, DOCX)';
 
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_data
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_data
 COMMENT 'Knowledge base embeddings';
 
 -- Verify
-SHOW VOLUMES IN main.default;
+SHOW VOLUMES IN hackathon.default;
 ```
 
 **Expected Output:**
 ```
 volume_catalog | volume_schema | volume_name
-main           | default       | hackathon_chatbot_uploads
-main           | default       | hackathon_chatbot_data
+hackathon      | default       | hackathon_chatbot_uploads
+hackathon      | default       | hackathon_chatbot_data
 ```
 
 ---
@@ -307,8 +307,8 @@ dbutils.widgets.text("databricks_token", "YOUR_TOKEN_HERE", "Token")
 **Fix:**
 ```sql
 -- Run this SQL
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_uploads;
-CREATE VOLUME IF NOT EXISTS main.default.hackathon_chatbot_data;
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_uploads;
+CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_data;
 ```
 
 ---
