@@ -24,10 +24,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize components
+# Initialize components (pass storage dir to knowledge_base)
 document_processor = DocumentProcessor()
-knowledge_base = KnowledgeBase()
-chat_handler = ChatHandler(knowledge_base)
+
+# Determine storage directory for knowledge base
+if os.path.exists("/Volumes"):
+    KB_STORAGE_DIR = "/Volumes/main/default/hackathon_chatbot_data"
+elif os.path.exists("/dbfs"):
+    KB_STORAGE_DIR = "/dbfs/FileStore/hackathon-chatbot/simple_db"
+else:
+    KB_STORAGE_DIR = "simple_db"
+
+knowledge_base = KnowledgeBase(collection_name="documents")
+chat_handler = ChatHandler(knowledge_base)  # Auto-detects Databricks settings
 
 # Configure upload directory - Use Unity Catalog Volumes if available
 if os.path.exists("/Volumes"):

@@ -2,40 +2,72 @@ import os
 import requests
 import json
 from typing import List, Tuple
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-# Note: Set DATABRICKS_TOKEN environment variable before running
-# export DATABRICKS_TOKEN='your-token-here'
 
 class ChatHandler:
-    """Handles chat interactions and response generation"""
+    """Handles chat interactions and response generation (Databricks-compatible)"""
     
-    def __init__(self, knowledge_base):
+    def __init__(self, knowledge_base, endpoint: str = None, token: str = None):
         self.knowledge_base = knowledge_base
         
-        # Initialize Databricks LLM endpoint from environment variables
-        self.databricks_endpoint = os.getenv(
+        # Auto-detect Databricks environment
+        self.is_databricks = self._is_databricks_env()
+        
+        # Get token (priority: parameter → dbutils → environment)
+        self.access_token = token or self._get_token()
+        
+        # Get endpoint (priority: parameter → environment → default)
+        self.databricks_endpoint = endpoint or os.getenv(
             "DATABRICKS_ENDPOINT",
-            "https://dbc-4a93b454-f17b.cloud.databricks.com/serving-endpoints/databricks-llama-4-maverick/invocations"
+            self._get_default_endpoint()
         )
         
-        # Get token from environment variable (NEVER hardcode tokens!)
-        self.access_token = os.getenv("DATABRICKS_TOKEN")
-        
-        if not self.access_token:
-            print("⚠️ WARNING: DATABRICKS_TOKEN environment variable not set!")
-            print("Set it with: export DATABRICKS_TOKEN='your-token-here'")
-        
-        # Headers for Databricks API
+        # Headers for API calls
         self.headers = {
-            "Authorization": f"Bearer {self.access_token}",
+            "Authorization": f"Bearer {self.access_token}" if self.access_token else "",
             "Content-Type": "application/json"
         }
         
-        print("Databricks LLM endpoint configured successfully.")
+        # Status logging
+        if self.access_token:
+            print(f"✅ Chat handler initialized (Databricks: {self.is_databricks})")
+        else:
+            print("⚠️ WARNING: No Databricks token found!")
+            print("   Set DATABRICKS_TOKEN environment variable or use dbutils.secrets")
+    
+    def _is_databricks_env(self) -> bool:
+        """Detect if running in Databricks"""
+        return os.path.exists("/dbfs") or os.path.exists("/Volumes") or "DATABRICKS_RUNTIME_VERSION" in os.environ
+    
+    def _get_token(self) -> str:
+        """Get token from multiple sources (priority order)"""
+        # Priority 1: Environment variable
+        token = os.getenv("DATABRICKS_TOKEN")
+        if token:
+            return token
+        
+        # Priority 2: Databricks secrets (if available)
+        if self.is_databricks:
+            try:
+                from pyspark.dbutils import DBUtils
+                from pyspark.sql import SparkSession
+                spark = SparkSession.builder.getOrCreate()
+                dbutils = DBUtils(spark)
+                token = dbutils.secrets.get(scope="hackathon-chatbot", key="databricks-token")
+                print("✅ Using Databricks Secrets")
+                return token
+            except:
+                pass
+        
+        return None
+    
+    def _get_default_endpoint(self) -> str:
+        """Get default endpoint based on environment"""
+        if self.is_databricks:
+            # Try to auto-detect workspace URL
+            workspace_url = os.getenv("DATABRICKS_HOST", "https://dbc-4a93b454-f17b.cloud.databricks.com")
+            return f"{workspace_url}/serving-endpoints/databricks-llama-4-maverick/invocations"
+        else:
+            return "https://dbc-4a93b454-f17b.cloud.databricks.com/serving-endpoints/databricks-llama-4-maverick/invocations"
     
     async def generate_response(self, query: str, use_openai: bool = False) -> Tuple[str, List[str]]:
         """Generate a response to user query"""
