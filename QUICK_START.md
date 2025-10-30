@@ -28,7 +28,7 @@ databricks secrets put-secret hackathon-chatbot databricks-token
 Look for output like:
 ```
 🌐 YOUR API URL:
-https://dbc-xxx.cloud.databricks.com/driver-proxy/o/xxx/xxx/8000
+https://dbc-xxx.cloud.databricks.com/driver-proxy/o/xxx/xxx/8088
 ```
 
 ### 5️⃣ Test (30 sec)
@@ -48,13 +48,13 @@ After running all cells, you should see:
 ================================================================================
 
 🌐 YOUR API URL:
-https://dbc-4a93b454-f17b.cloud.databricks.com/driver-proxy/o/1234567890/0815-123456-abc123/8000
+https://dbc-4a93b454-f17b.cloud.databricks.com/driver-proxy/o/1234567890/0815-123456-abc123/8088
 
 📚 API Documentation:
-https://dbc-4a93b454-f17b.cloud.databricks.com/driver-proxy/o/1234567890/0815-123456-abc123/8000/docs
+https://dbc-4a93b454-f17b.cloud.databricks.com/driver-proxy/o/1234567890/0815-123456-abc123/8088/docs
 
 🔍 Health Check:
-https://dbc-4a93b454-f17b.cloud.databricks.com/driver-proxy/o/1234567890/0815-123456-abc123/8000/health
+https://dbc-4a93b454-f17b.cloud.databricks.com/driver-proxy/o/1234567890/0815-123456-abc123/8088/health
 
 ================================================================================
 

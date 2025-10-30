@@ -53,7 +53,7 @@ compute:
   max_instances: 3
 
 env:
-  - PORT=8000
+  - PORT=8088
   - EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
 
 volumes:
@@ -68,7 +68,7 @@ healthcheck:
   timeout: 10s
 
 ports:
-  - 8000
+  - 8088
   - 3000
 ```
 
@@ -168,14 +168,14 @@ os.makedirs(SIMPLE_DB, exist_ok=True)
 # COMMAND ----------
 # Run the FastAPI server
 def run_server():
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8088)
 
 # Start server in background thread
 server_thread = Thread(target=run_server, daemon=True)
 server_thread.start()
 
-print("✅ Backend server started on port 8000")
-print("📍 Access the API at: https://{your-workspace}.cloud.databricks.com/driver-proxy/o/{org-id}/{cluster-id}/8000/")
+print("✅ Backend server started on port 8088")
+print("📍 Access the API at: https://{your-workspace}.cloud.databricks.com/driver-proxy/o/{org-id}/{cluster-id}/8088/")
 
 # COMMAND ----------
 # Keep notebook running
@@ -270,7 +270,7 @@ Update `frontend/src/components/ChatInterface.jsx`:
 // Replace getCurrentHost() function
 const getCurrentHost = () => {
   // Use Databricks driver proxy URL
-  return 'https://{your-workspace}.cloud.databricks.com/driver-proxy/o/{org-id}/{cluster-id}/8000';
+  return 'https://{your-workspace}.cloud.databricks.com/driver-proxy/o/{org-id}/{cluster-id}/8088';
 };
 ```
 
@@ -346,7 +346,7 @@ dbutils.fs.put("dbfs:/FileStore/hackathon-chatbot/config/.env", """
 DATABRICKS_HOST=https://dbc-4a93b454-f17b.cloud.databricks.com
 DATABRICKS_TOKEN=your-token-here
 EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
-PORT=8000
+PORT=8088
 """, overwrite=True)
 ```
 

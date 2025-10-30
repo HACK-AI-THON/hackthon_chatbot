@@ -793,7 +793,7 @@ import time
 
 def run_server():
     """Run FastAPI server"""
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=8088, log_level="info")
 
 # Start server in background
 server_thread = Thread(target=run_server, daemon=True)
@@ -805,7 +805,7 @@ print("=" * 80)
 print()
 
 if db_context:
-    driver_proxy_url = f"{db_context['workspace_url']}/driver-proxy/o/{db_context['org_id']}/{db_context['cluster_id']}/8000"
+    driver_proxy_url = f"{db_context['workspace_url']}/driver-proxy/o/{db_context['org_id']}/{db_context['cluster_id']}/8088"
     print("🌐 YOUR API URL:")
     print(driver_proxy_url)
     print()
@@ -815,8 +815,8 @@ if db_context:
     print("🔍 Health Check:")
     print(f"{driver_proxy_url}/health")
 else:
-    print("🌐 API URL: http://localhost:8000")
-    print("📚 Documentation: http://localhost:8000/docs")
+    print("🌐 API URL: http://localhost:8088")
+    print("📚 Documentation: http://localhost:8088/docs")
 
 print()
 print("=" * 80)
@@ -847,7 +847,7 @@ except KeyboardInterrupt:
 # Test the API
 import requests
 
-base_url = "http://localhost:8000"
+base_url = "http://localhost:8088"
 
 # Health check
 response = requests.get(f"{base_url}/health")

@@ -50,7 +50,7 @@ pip install -r ../requirements.txt
 python main.py
 ```
 
-The backend will be available at `http://localhost:8000`
+The backend will be available at `http://localhost:8088`
 
 #### 2. Frontend Setup
 ```bash
@@ -149,17 +149,17 @@ Edit `frontend/src/components/ChatInterface.jsx` to configure:
 | DELETE | `/documents/{filename}` | Delete document |
 | DELETE | `/clear` | Clear all documents |
 
-API Documentation available at: `http://localhost:8000/docs`
+API Documentation available at: `http://localhost:8088/docs`
 
 ## 🧪 Testing
 
 ### Test Backend
 ```bash
 # Health check
-curl http://localhost:8000/health
+curl http://localhost:8088/health
 
 # List documents
-curl http://localhost:8000/documents
+curl http://localhost:8088/documents
 ```
 
 ### Test Frontend
@@ -186,7 +186,7 @@ port = int(os.getenv("PORT", 8001))  # Use 8001 instead
 ### Frontend Issues
 
 **Issue: Cannot connect to backend**
-- Verify backend is running on port 8000
+- Verify backend is running on port 8088
 - Check `API_BASE_URL` in `ChatInterface.jsx`
 
 **Issue: Build fails**
