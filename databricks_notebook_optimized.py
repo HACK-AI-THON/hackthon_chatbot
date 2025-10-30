@@ -1,16 +1,16 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Hackathon Chatbot - Databricks Optimized
-# MAGIC 
+# MAGIC
 # MAGIC **Fully Databricks-Native Implementation**
-# MAGIC 
+# MAGIC
 # MAGIC Features:
 # MAGIC - ✅ Auto-detects workspace paths
 # MAGIC - ✅ Native Databricks Secrets integration
 # MAGIC - ✅ Unity Catalog Volumes
 # MAGIC - ✅ Interactive widgets for configuration
 # MAGIC - ✅ Optimized for Databricks environment
-# MAGIC 
+# MAGIC
 # MAGIC ## Quick Start:
 # MAGIC 1. Create Unity Catalog Volumes (see cell below)
 # MAGIC 2. Set up Databricks Secrets (or use widget)
@@ -21,7 +21,7 @@
 
 # MAGIC %md
 # MAGIC ## Setup: Create Unity Catalog Volumes
-# MAGIC 
+# MAGIC
 # MAGIC Run this SQL first (one-time setup):
 
 # COMMAND ----------
@@ -30,10 +30,10 @@
 # MAGIC -- Create volumes for data storage
 # MAGIC CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_uploads
 # MAGIC COMMENT 'Uploaded documents storage (PDF, DOCX)';
-# MAGIC 
+# MAGIC
 # MAGIC CREATE VOLUME IF NOT EXISTS hackathon.default.hackathon_chatbot_data
 # MAGIC COMMENT 'Knowledge base vector embeddings storage';
-# MAGIC 
+# MAGIC
 # MAGIC -- Verify
 # MAGIC SHOW VOLUMES IN hackathon.default;
 
@@ -44,7 +44,7 @@
 
 # COMMAND ----------
 
-%pip install --upgrade "huggingface_hub>=0.14.1" "sentence-transformers>=2.3.1,<5.2.0" fastapi==0.104.1 uvicorn[standard]==0.24.0 python-multipart==0.0.6 PyPDF2==3.0.1 python-docx==1.1.0 requests==2.31.0 scikit-learn==1.3.2
+# MAGIC %pip install --upgrade "huggingface_hub>=0.14.1" "sentence-transformers>=2.3.1,<5.2.0" fastapi==0.104.1 uvicorn[standard]==0.24.0 python-multipart==0.0.6 PyPDF2==3.0.1 python-docx==1.1.0 requests==2.31.0 scikit-learn==1.3.2
 
 # COMMAND ----------
 
@@ -782,6 +782,138 @@ print("✅ FastAPI application configured")
 
 # COMMAND ----------
 
+# COMMAND ----------
+
+# Override the root endpoint to serve frontend
+from fastapi.responses import FileResponse
+
+# Remove the old root route
+routes_to_keep = []
+for route in app.routes:
+    if hasattr(route, 'path') and route.path == "/" and hasattr(route, 'methods'):
+        print(f"🗑️ Removing old route: {route.methods} {route.path}")
+        continue  # Skip this route
+    routes_to_keep.append(route)
+
+# Update routes
+app.router.routes = routes_to_keep
+
+# Add frontend root route
+frontend_path = "/Volumes/hackathon/default/hackathon_chatbot_data/frontend"
+
+@app.get("/", response_class=FileResponse)
+async def serve_frontend():
+    """Serve the frontend application"""
+    return FileResponse(f"{frontend_path}/index.html")
+
+print("✅ Root endpoint updated to serve frontend")
+print("\nNew routes:")
+for route in app.routes:
+    if hasattr(route, 'path') and route.path == "/":
+        print(f"  ✓ {route.methods if hasattr(route, 'methods') else 'MOUNT'} {route.path} -> Frontend HTML")
+
+# COMMAND ----------
+
+# COMMAND ----------
+
+# Manual asset serving (works better with Unity Catalog Volumes)
+from fastapi import Response
+import mimetypes
+import os
+
+frontend_path = "/Volumes/hackathon/default/hackathon_chatbot_data/frontend"
+
+# Remove the StaticFiles mount (doesn't work well with Volumes)
+routes_to_keep = []
+for route in app.routes:
+    # Keep all routes except the /assets mount
+    if hasattr(route, 'path') and route.path == "/assets":
+        print(f"🗑️ Removing StaticFiles mount for /assets")
+        continue
+    routes_to_keep.append(route)
+
+app.router.routes = routes_to_keep
+
+# Add manual asset routes
+@app.get("/assets/{file_path:path}")
+async def serve_assets(file_path: str):
+    """Serve static assets"""
+    file_full_path = os.path.join(frontend_path, "assets", file_path)
+    
+    if not os.path.exists(file_full_path):
+        return Response(status_code=404, content="File not found")
+    
+    # Determine MIME type
+    mime_type, _ = mimetypes.guess_type(file_full_path)
+    if mime_type is None:
+        if file_path.endswith('.js'):
+            mime_type = 'application/javascript'
+        elif file_path.endswith('.css'):
+            mime_type = 'text/css'
+        else:
+            mime_type = 'application/octet-stream'
+    
+    # Read and return file
+    with open(file_full_path, 'rb') as f:
+        content = f.read()
+    
+    return Response(content=content, media_type=mime_type)
+
+print("✅ Manual asset serving configured")
+print(f"📁 Serving from: {frontend_path}/assets/")
+print(f"✓ CSS files will use MIME type: text/css")
+print(f"✓ JS files will use MIME type: application/javascript")
+
+# COMMAND ----------
+
+# COMMAND ----------
+
+# Full diagnostic and fix
+import os
+
+frontend_path = "/Volumes/hackathon/default/hackathon_chatbot_data/frontend"
+
+print("="*80)
+print("🔍 DIAGNOSTIC CHECK")
+print("="*80)
+
+# Check files exist
+print("\n1️⃣ Checking files:")
+index_exists = os.path.exists(f"{frontend_path}/index.html")
+css_exists = os.path.exists(f"{frontend_path}/assets/index-CTtEJaLV.css")
+js_exists = os.path.exists(f"{frontend_path}/assets/index-K_8xONh4.js")
+
+print(f"   index.html: {'✅' if index_exists else '❌'}")
+print(f"   CSS file: {'✅' if css_exists else '❌'}")
+print(f"   JS file: {'✅' if js_exists else '❌'}")
+
+# Check current routes
+print("\n2️⃣ Current app routes:")
+for route in app.routes:
+    if hasattr(route, 'path'):
+        methods = getattr(route, 'methods', ['MOUNT'])
+        if route.path in ['/', '/assets', '/assets/{file_path:path}']:
+            print(f"   {list(methods)} {route.path}")
+
+# Test reading files
+print("\n3️⃣ Testing file access:")
+try:
+    with open(f"{frontend_path}/assets/index-CTtEJaLV.css", 'r') as f:
+        css_content = f.read()[:100]
+        print(f"   CSS size: {len(css_content)} bytes (sample read)")
+except Exception as e:
+    print(f"   ❌ Error reading CSS: {e}")
+
+print("\n" + "="*80)
+print("💡 RECOMMENDATION: We need to restart Python kernel")
+print("="*80)
+print("\n📋 Next steps:")
+print("   1. Click 'Detach & Re-attach' or 'Restart Python'")
+print("   2. Run all cells from the top")
+print("   3. This ensures clean route registration")
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ## 7. Start Server
 
@@ -839,6 +971,137 @@ except KeyboardInterrupt:
 
 # COMMAND ----------
 
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Extract and Prepare Frontend
+
+# COMMAND ----------
+
+# Extract frontend files
+import zipfile
+import os
+from pathlib import Path
+
+# Paths
+zip_path = "/Volumes/hackathon/default/hackathon_chatbot_data/frontend_dist.zip"
+extract_path = "/Volumes/hackathon/default/hackathon_chatbot_data/frontend"
+
+# Create frontend directory
+Path(extract_path).mkdir(parents=True, exist_ok=True)
+
+# Extract zip file
+with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+    zip_ref.extractall(extract_path)
+
+print(f"✅ Frontend extracted to: {extract_path}")
+print(f"📁 Files:")
+for root, dirs, files in os.walk(extract_path):
+    for file in files[:10]:
+        rel_path = os.path.relpath(os.path.join(root, file), extract_path)
+        print(f"   - {rel_path}")
+
+# COMMAND ----------
+
+# COMMAND ----------
+
+# Check actual file structure
+import os
+from pathlib import Path
+
+frontend_path = "/Volumes/hackathon/default/hackathon_chatbot_data/frontend"
+
+print("📂 Actual directory structure:")
+for root, dirs, files in os.walk(frontend_path):
+    level = root.replace(frontend_path, '').count(os.sep)
+    indent = ' ' * 2 * level
+    print(f'{indent}{os.path.basename(root)}/')
+    subindent = ' ' * 2 * (level + 1)
+    for file in files:
+        print(f'{subindent}{file}')
+
+print("\n" + "="*80)
+
+# Check if assets directory exists
+assets_path = f"{frontend_path}/assets"
+if os.path.exists(assets_path):
+    print(f"✅ Assets directory exists: {assets_path}")
+else:
+    print(f"❌ Assets directory NOT found: {assets_path}")
+    print("\n🔧 Fixing the structure...")
+    
+    # Re-extract with proper handling
+    import zipfile
+    import shutil
+    
+    # Clear and recreate
+    if os.path.exists(frontend_path):
+        shutil.rmtree(frontend_path)
+    os.makedirs(frontend_path, exist_ok=True)
+    
+    # Extract properly
+    zip_path = "/Volumes/hackathon/default/hackathon_chatbot_data/frontend_dist.zip"
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        for member in zip_ref.namelist():
+            # Convert Windows paths to Unix paths
+            member_path = member.replace('\\', '/')
+            target_path = os.path.join(frontend_path, member_path)
+            
+            # Create directories if needed
+            os.makedirs(os.path.dirname(target_path), exist_ok=True)
+            
+            # Extract file
+            if not member.endswith('/'):
+                with zip_ref.open(member) as source, open(target_path, 'wb') as target:
+                    target.write(source.read())
+    
+    print("✅ Files re-extracted with proper structure")
+    
+    # List again
+    print("\n📂 New structure:")
+    for root, dirs, files in os.walk(frontend_path):
+        level = root.replace(frontend_path, '').count(os.sep)
+        indent = ' ' * 2 * level
+        print(f'{indent}{os.path.basename(root)}/')
+        subindent = ' ' * 2 * (level + 1)
+        for file in files[:5]:  # Show first 5 files per directory
+            print(f'{subindent}{file}')
+
+# COMMAND ----------
+
+# COMMAND ----------
+
+# Add static file serving to the FastAPI app
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+# Mount frontend static files
+frontend_path = "/Volumes/hackathon/default/hackathon_chatbot_data/frontend"
+
+# Verify paths exist
+import os
+print(f"Frontend path exists: {os.path.exists(frontend_path)}")
+print(f"Assets path exists: {os.path.exists(f'{frontend_path}/assets')}")
+print(f"Index.html exists: {os.path.exists(f'{frontend_path}/index.html')}")
+
+# Serve static files (assets folder)
+app.mount("/assets", StaticFiles(directory=f"{frontend_path}/assets"), name="assets")
+
+# Serve index.html at root
+@app.get("/", response_class=FileResponse)
+async def serve_frontend():
+    return FileResponse(f"{frontend_path}/index.html")
+
+# Serve logo
+@app.get("/hack-ai-thon.png", response_class=FileResponse)
+async def serve_logo():
+    return FileResponse(f"{frontend_path}/hack-ai-thon.png")
+
+print("\n✅ Frontend routes added to FastAPI app")
+print("🌐 Frontend will be available at the API URL root")
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ## 9. Test Your API
 
@@ -863,13 +1126,13 @@ print(response.json())
 
 # MAGIC %md
 # MAGIC ## ✅ Deployment Complete!
-# MAGIC 
+# MAGIC
 # MAGIC Your chatbot is now running on Databricks with:
 # MAGIC - ✅ Unity Catalog Volumes
 # MAGIC - ✅ Databricks Secrets
 # MAGIC - ✅ Auto-detected workspace configuration
 # MAGIC - ✅ FastAPI REST API
 # MAGIC - ✅ RAG with Databricks LLM
-# MAGIC 
+# MAGIC
 # MAGIC Use the driver proxy URL above to access from your frontend!
-
+# MAGIC
