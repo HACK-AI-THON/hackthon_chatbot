@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { API_BASE_URL } from '../config';
 
 const ChatInterface = ({ documents, onDocumentsChange }) => {
   const [messages, setMessages] = useState([]);
@@ -10,18 +11,6 @@ const ChatInterface = ({ documents, onDocumentsChange }) => {
   const [useOpenAI] = useState(true); // Always use Databricks LLM
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
-
-  // Dynamically determine API base URL based on current host
-  const getCurrentHost = () => {
-    if (typeof window !== 'undefined') {
-      const protocol = window.location.protocol;
-      const hostname = window.location.hostname;
-      return `${protocol}//${hostname}:8000`;
-    }
-    return 'http://localhost:8000'; // fallback for SSR
-  };
-  
-  const API_BASE_URL = getCurrentHost();
 
   useEffect(() => {
     scrollToBottom();

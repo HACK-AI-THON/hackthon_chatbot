@@ -63,21 +63,40 @@ import sys
 from pathlib import Path
 
 # ====================
+# ⚙️ CONFIGURATION - Your Databricks Environment
+# ====================
+
+# 🔧 Set your Databricks details here
+DATABRICKS_WORKSPACE_URL = "https://dbc-4a93b454-f17b.cloud.databricks.com"
+DATABRICKS_ORG_ID = "1978110925405963"
+DATABRICKS_CLUSTER_ID = "1017-190030-sow9d43h"
+
+# ====================
 # Databricks Context Detection
 # ====================
 
 def get_databricks_context():
-    """Get Databricks workspace context (Spark Connect compatible)"""
+    """Get Databricks workspace context (uses configured values)"""
     try:
         import os
         
-        # Try to get from dbutils (works in notebooks)
+        # Priority 1: Use hardcoded configuration values
+        if DATABRICKS_ORG_ID and DATABRICKS_CLUSTER_ID:
+            return {
+                "workspace_url": DATABRICKS_WORKSPACE_URL,
+                "org_id": DATABRICKS_ORG_ID,
+                "cluster_id": DATABRICKS_CLUSTER_ID,
+                "user": os.getenv("USER", "unknown"),
+                "browser_host_name": DATABRICKS_WORKSPACE_URL.replace("https://", "")
+            }
+        
+        # Priority 2: Try to get from dbutils (works in notebooks)
         try:
             # Get notebook context
             notebook_context = dbutils.notebook.entry_point.getDbutils().notebook().getContext()
             
             return {
-                "workspace_url": notebook_context.apiUrl().getOrElse("https://dbc-4a93b454-f17b.cloud.databricks.com"),
+                "workspace_url": notebook_context.apiUrl().getOrElse(DATABRICKS_WORKSPACE_URL),
                 "org_id": notebook_context.tags().get("orgId").getOrElse("unknown"),
                 "cluster_id": notebook_context.tags().get("clusterId").getOrElse("unknown"),
                 "user": notebook_context.tags().get("user").getOrElse("unknown"),
@@ -86,10 +105,8 @@ def get_databricks_context():
         except:
             pass
         
-        # Fallback: Use environment variables (Spark Connect compatible)
-        workspace_url = os.getenv("DATABRICKS_HOST", "https://dbc-4a93b454-f17b.cloud.databricks.com")
-        
-        # Extract org_id and cluster_id from environment if available
+        # Priority 3: Use environment variables (Spark Connect compatible)
+        workspace_url = os.getenv("DATABRICKS_HOST", DATABRICKS_WORKSPACE_URL)
         org_id = os.getenv("DATABRICKS_ORG_ID", "unknown")
         cluster_id = os.getenv("DATABRICKS_CLUSTER_ID", "unknown")
         user = os.getenv("USER", "unknown")

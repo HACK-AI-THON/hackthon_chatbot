@@ -1,21 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 
 const DocumentManager = ({ documents, onDocumentsChange, loading, setLoading }) => {
   const [message, setMessage] = useState({ type: '', content: '' });
   const [scanning, setScanning] = useState(false);
-
-  // Dynamically determine API base URL based on current host
-  const getCurrentHost = () => {
-    if (typeof window !== 'undefined') {
-      const protocol = window.location.protocol;
-      const hostname = window.location.hostname;
-      return `${protocol}//${hostname}:8000`;
-    }
-    return 'http://localhost:8000'; // fallback for SSR
-  };
-  
-  const API_BASE_URL = getCurrentHost();
 
   const showMessage = (type, content) => {
     setMessage({ type, content });

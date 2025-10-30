@@ -3,6 +3,13 @@ import requests
 import json
 from typing import List, Tuple
 
+# ====================
+# ⚙️ CONFIGURATION - Databricks Environment
+# ====================
+DATABRICKS_WORKSPACE_URL = "https://dbc-4a93b454-f17b.cloud.databricks.com"
+DATABRICKS_ORG_ID = "1978110925405963"
+DATABRICKS_CLUSTER_ID = "1017-190030-sow9d43h"
+
 class ChatHandler:
     """Handles chat interactions and response generation (Databricks-compatible)"""
     
@@ -62,12 +69,9 @@ class ChatHandler:
     
     def _get_default_endpoint(self) -> str:
         """Get default endpoint based on environment"""
-        if self.is_databricks:
-            # Try to auto-detect workspace URL
-            workspace_url = os.getenv("DATABRICKS_HOST", "https://dbc-4a93b454-f17b.cloud.databricks.com")
-            return f"{workspace_url}/serving-endpoints/databricks-llama-4-maverick/invocations"
-        else:
-            return "https://dbc-4a93b454-f17b.cloud.databricks.com/serving-endpoints/databricks-llama-4-maverick/invocations"
+        # Use configured workspace URL with fallback to environment variable
+        workspace_url = os.getenv("DATABRICKS_HOST", DATABRICKS_WORKSPACE_URL)
+        return f"{workspace_url}/serving-endpoints/databricks-llama-4-maverick/invocations"
     
     async def generate_response(self, query: str, use_openai: bool = False) -> Tuple[str, List[str]]:
         """Generate a response to user query"""

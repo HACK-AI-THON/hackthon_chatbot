@@ -73,27 +73,29 @@ The frontend will be available at `http://localhost:3000`
 
 ## ☁️ Databricks Deployment
 
-This application is designed to run on Databricks. See detailed deployment instructions:
+This application is designed to run on Databricks with Unity Catalog Volumes.
 
-📖 **[Quick Start Guide](README_DEPLOYMENT.md)** - 5-minute deployment walkthrough  
-📖 **[Complete Deployment Guide](DATABRICKS_DEPLOYMENT.md)** - Comprehensive guide with 3 deployment options  
-📓 **[Databricks Notebook](databricks_backend_notebook.py)** - Ready-to-use notebook file  
-🔧 **[Setup Script](databricks_setup.sh)** - Automated deployment script
+📖 **[Quick Start Guide](QUICK_START.md)** - Fast deployment walkthrough  
+📖 **[Complete Deployment Guide](DATABRICKS_DEPLOYMENT.md)** - Comprehensive deployment instructions  
+📓 **[Databricks Notebook](databricks_notebook_optimized.py)** - Optimized notebook for Spark Connect  
+🔐 **[Secrets Setup Guide](SECRETS_SETUP.md)** - Secure token configuration  
+📦 **[Unity Catalog Setup](UNITY_CATALOG_SETUP.md)** - Volume configuration guide
 
-### Quick Databricks Deploy
-```bash
-# Install Databricks CLI
-pip install databricks-cli
+### ⚙️ Configuration
 
-# Configure authentication
-databricks configure --token
+Before deploying, update these values in the notebook and backend code:
 
-# Run automated setup
-chmod +x databricks_setup.sh
-./databricks_setup.sh
-
-# Follow the prompts to upload files and configure
+```python
+# Set your Databricks details
+DATABRICKS_WORKSPACE_URL = "https://your-workspace.cloud.databricks.com"
+DATABRICKS_ORG_ID = "your-org-id"
+DATABRICKS_CLUSTER_ID = "your-cluster-id"
 ```
+
+These are configured in:
+- `databricks_notebook_optimized.py` (lines 70-72)
+- `backend/chat_handler.py` (lines 9-11)
+- `frontend/src/config.js` (API URL)
 
 ## 📁 Project Structure
 

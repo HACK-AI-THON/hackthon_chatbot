@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ChatInterface from './components/ChatInterface';
 import './App.css';
+import { API_BASE_URL } from './config';
 
 function App() {
   const [documents, setDocuments] = useState([]);
@@ -12,12 +13,7 @@ function App() {
 
   const fetchDocuments = async () => {
     try {
-      // Dynamically determine API base URL based on current host
-      const protocol = window.location.protocol;
-      const hostname = window.location.hostname;
-      const apiBaseUrl = `${protocol}//${hostname}:8000`;
-      
-      const response = await fetch(`${apiBaseUrl}/documents`);
+      const response = await fetch(`${API_BASE_URL}/documents`);
       const data = await response.json();
       setDocuments(data.documents || []);
     } catch (error) {
