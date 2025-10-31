@@ -1,8 +1,9 @@
 // API Configuration for Databricks Deployment
 // This file contains the backend API URL
 
-// Databricks API URL (from driver-proxy)
-export const API_BASE_URL = "https://dbc-4a93b454-f17b.cloud.databricks.com/driver-proxy/o/1978110925405963/1017-190030-sow9d43h/8088";
+// Use relative URL to handle Databricks redirects automatically
+// This works regardless of which domain (f17b or dbc-dp) the user is redirected to
+export const API_BASE_URL = "";
 
 // For local development, uncomment the line below:
 // export const API_BASE_URL = "http://localhost:8088";
