@@ -41,21 +41,28 @@ from docx import Document as DocxDocument
 # COMMAND ----------
 
 # ================================================================
-# 2️⃣ Databricks Context
+# 2️⃣ Databricks Context (Dynamic)
 # ================================================================
-DATABRICKS_WORKSPACE_URL = "https://dbc-4a93b454-f17b.cloud.databricks.com"
-DATABRICKS_ORG_ID = "1978110925405963"
-DATABRICKS_CLUSTER_ID = "1017-190030-sow9d43h"
+# Get actual Databricks context dynamically from the running cluster
+try:
+    db_context = json.loads(dbutils.notebook.entry_point.getDbutils().notebook().getContext().toJson())
+    DATABRICKS_WORKSPACE_URL = db_context['tags']['browserHostName']
+    if not DATABRICKS_WORKSPACE_URL.startswith('http'):
+        DATABRICKS_WORKSPACE_URL = f"https://{DATABRICKS_WORKSPACE_URL}"
+    DATABRICKS_ORG_ID = db_context['tags']['orgId']
+    DATABRICKS_CLUSTER_ID = db_context['tags']['clusterId']
+    print("✅ Databricks context loaded dynamically")
+except Exception as e:
+    print(f"⚠️ Could not get Databricks context: {e}")
+    # Fallback to hardcoded values
+    DATABRICKS_WORKSPACE_URL = "https://dbc-4a93b454-f17b.cloud.databricks.com"
+    DATABRICKS_ORG_ID = "1978110925405963"
+    DATABRICKS_CLUSTER_ID = "1017-190030-sow9d43h"
+    print("⚠️ Using fallback hardcoded values")
 
-db_context = {
-    "workspace_url": DATABRICKS_WORKSPACE_URL,
-    "org_id": DATABRICKS_ORG_ID,
-    "cluster_id": DATABRICKS_CLUSTER_ID,
-    "browser_host_name": DATABRICKS_WORKSPACE_URL.replace("https://", "")
-}
-
-print("✅ Databricks context loaded")
-print(json.dumps(db_context, indent=2))
+print(f"Workspace: {DATABRICKS_WORKSPACE_URL}")
+print(f"Org ID: {DATABRICKS_ORG_ID}")
+print(f"Cluster ID: {DATABRICKS_CLUSTER_ID}")
 
 # COMMAND ----------
 
@@ -324,11 +331,8 @@ async def serve_vite():
 async def health():
     return {"status": "ok", "frontend": os.path.exists(os.path.join(frontend_path, 'index.html'))}
 
-# --- 8️⃣ Print access URL for Databricks driver proxy
-workspace_url = "https://dbc-4a93b454-f17b.cloud.databricks.com"
-org_id = "1978110925405963"
-cluster_id = "1017-190030-sow9d43h"
-proxy_url = f"{workspace_url}/driver-proxy/o/{org_id}/{cluster_id}/8088/"
+# --- 8️⃣ Print access URL for Databricks driver proxy (using dynamic context from above)
+proxy_url = f"{DATABRICKS_WORKSPACE_URL}/driver-proxy/o/{DATABRICKS_ORG_ID}/{DATABRICKS_CLUSTER_ID}/8088/"
 print(f"\n🌐 Access frontend at:\n{proxy_url}\n")
 
 
@@ -346,4 +350,5 @@ def run_server():
 
 Thread(target=run_server, daemon=True).start()
 print("🌐 Access app via driver proxy URL below:\n")
-print(f"{DATABRICKS_WORKSPACE_URL}/driver-proxy/o/{DATABRICKS_ORG_ID}/{DATABRICKS_CLUSTER_ID}/8088")
+print(f"{DATABRICKS_WORKSPACE_URL}/driver-proxy/o/{DATABRICKS_ORG_ID}/{DATABRICKS_CLUSTER_ID}/8088/")
+print("✅ Server started successfully!")
